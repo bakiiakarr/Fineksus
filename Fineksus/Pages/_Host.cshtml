@@ -1,0 +1,14 @@
+﻿@page "/"
+@namespace Fineksus.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = "_Layout";
+}
+<head>
+    ...
+    <link href="_content/Syncfusion.Blazor.Themes/bootstrap5.css" rel="stylesheet" />
+    <!--Refer theme style sheet as below if you are using Syncfusion.Blazor Single NuGet-->
+    <!--<link href="_content/Syncfusion.Blazor/styles/bootstrap5.css" rel="stylesheet" />-->
+</head>
+
+<component type="typeof(App)" render-mode="ServerPrerendered" />

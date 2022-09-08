@@ -1,0 +1,162 @@
+﻿@page "/"
+@using Syncfusion.Blazor
+
+
+<SfDropDownList TValue="string" TItem="Folder" Width="250px" Placeholder="Select a Folder" DataSource="@LocalData">
+    <DropDownListEvents TItem="Folder" TValue="string" ValueChange="@ValueChangeHandler"></DropDownListEvents>
+    <DropDownListFieldSettings Value="ID" Text="Text"></DropDownListFieldSettings>
+</SfDropDownList>
+
+<SfGrid @ref="Grid" DataSource="@Orders" AllowPaging="true" AllowSorting="true" AllowFiltering="true" AllowGrouping="true" AllowSelection="true">
+    <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Multiple"></GridSelectionSettings>
+
+    <GridPageSettings PageSize="50"></GridPageSettings>
+    <GridColumns>
+        <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+
+        <GridColumn Field=@nameof(Order.Product) HeaderText="Product Name" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+        <GridColumn Field=@nameof(Order.Version) HeaderText="Version" Width="150"></GridColumn>
+        <GridColumn Field=@nameof(Order.ReadMe) HeaderText="Read Me" Format="d" Type="ColumnType.Date" TextAlign="TextAlign.Right" Width="130">
+            <Template>
+                @{
+                    var employee = (context as Order);
+
+                    <div class="image">
+                        <SfButton Content="View" IconCss="e-icons e-eye" OnClick="@(()=>ClickedView(employee.PdfDocument))"></SfButton>
+
+                        <SfButton Content="Download" IconCss="e-icons e-chevron-down-fill" OnClick="@(()=>ClickedDownload(employee.PdfDocument))"></SfButton>
+
+                    </div>
+                }
+            </Template>
+        </GridColumn>
+        <GridColumn Field=@nameof(Order.ReleaseLetter) HeaderText="Release Letter" Format="C2" TextAlign="TextAlign.Right" Width="120">
+            <Template>
+                @{
+                    var employee = (context as Order);
+                    Console.WriteLine();
+                    <div class="image">
+                        <SfButton Content="View" IconCss="e-icons e-eye" OnClick="@(()=>ClickedView(employee.PdfDocument))"></SfButton>
+                        <SfButton Content="Download" IconCss="e-icons e-chevron-down-fill" OnClick="@(()=>ClickedDownload(employee.PdfDocument))"></SfButton>
+
+                    </div>
+                }
+            </Template>
+        </GridColumn>
+
+    </GridColumns>
+</SfGrid>
+<div id="target" style="width:800px;height:500px">
+    <SfButton @onclick="OnClick">Open PDF Viewer</SfButton>
+    <SfDialog @ref="@dialog" Target="#target" Width="1060px" Visible="false"
+              IsModal="true" Header="@Header" ShowCloseIcon="true">
+        <SfPdfViewerServer DocumentPath="@DocumentPath" @ref="@viewer" />
+    </SfDialog>
+</div>
+
+@code {
+    SfPdfViewerServer viewer;
+    SfDialog dialog;
+    SfGrid<Order> Grid { get; set; }
+
+
+    public List<Order> Orders = new();
+    private void ValueChangeHandler(ChangeEventArgs<string, Folder> args)
+    {
+        Orders.Clear();
+        var a = args.Value.ToString();
+        var splt = a.Split(",");
+        foreach (var folder in splt)
+        {
+            string[] lines = File.ReadAllLines(folder);
+            //Console.WriteLine(lines);
+            foreach (string line in lines)
+            {
+                var split = line.Split(',');
+                Orders.Add(new Order
+                    {
+                        Version = Int16.Parse(split[0]),
+                        Product = split[1],
+                        ReadMe = split[2],
+                        ReleaseLetter = split[3],
+                        PdfDocument=split[4]
+                    });
+            }
+        }
+
+        Grid.Refresh();
+    }
+
+    public class Order
+    {
+        public string? Product { get; set; }
+        public int Version { get; set; }
+        public string? ReadMe { get; set; }
+        public string? ReleaseLetter { get; set; }
+        public string? PdfDocument { get; set; }
+    }
+
+    public void OnClick(MouseEventArgs args)
+    {
+    }
+
+
+    public string DocumentPath { get; set; }
+    public string Header { get; set; } = "PDF Viewer";
+    public void ClickedView(string pdfDoc)
+    {
+        DocumentPath = pdfDoc;
+        this.dialog.Show();
+
+    }
+
+
+    public void ClickedDownload(string pdfDoc)
+    {
+        DocumentPath = pdfDoc;
+
+        viewer.Download();
+
+
+    }
+    //string[] lines = File.ReadAllLines("C:\\Users\\baki.akar\\Desktop\\Products\\X\\X 1.0.0.000\\Iphone.txt");
+
+
+
+
+
+    public class Folder
+    {
+        public string? ID { get; set; }
+        public string? Text { get; set; }
+    }
+    List<Folder> LocalData = new List<Folder> {
+    new Folder() { ID= "C:\\Users\\baki.akar\\Desktop\\Products\\X\\X 1.0.0.000\\Iphone.txt,C:\\Users\\baki.akar\\Desktop\\Products\\X\\X 1.0.0.001\\Samsung.txt,C:\\Users\\baki.akar\\Desktop\\Products\\X\\X 1.0.0.002\\xiaomi.txt", Text= "X" },
+    new Folder() { ID= @"C:\Users\baki.akar\Desktop\Products\Y\Y 1.0.0.000\BMW.txt,C:\Users\baki.akar\Desktop\Products\Y\Y 1.0.0.001\Mercedes.txt,C:\Users\baki.akar\Desktop\Products\Y\Y 1.0.0.002\Audi.txt", Text= "Y" },
+    new Folder() { ID= @"C:\Users\baki.akar\Desktop\Products\Z\Z 1.0.0.000\Nike.txt,C:\Users\baki.akar\Desktop\Products\Z\Z 1.0.0.001\Adidas.txt,C:\Users\baki.akar\Desktop\Products\Z\Z 1.0.0.002\UnderArmour.txt", Text= "Z" },
+
+  };
+
+
+
+
+    protected override void OnInitialized()
+    {
+        this.dialog.Show();
+        //Console.WriteLine(lines);
+        //foreach (string line in lines)
+        //{
+        //    var split = line.Split(',');
+        //    Orders.Add(new Order
+        //        {
+        //            Version = Int16.Parse(split[0]),
+        //            Product = split[1],
+        //            ReadMe = split[2],
+        //            ReleaseLetter = split[3],
+        //        });
+        //}
+
+    }
+
+
+}
